@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Export Successful – ComicCraft | Team 6ab22cb7</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-link">
+        <div class="brand-icon-box">💥</div>
+        <div>
+          <div class="brand-title">Comic<span>Craft</span></div>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <span class="nav-pill team-badge">TEAM ID: {{ team_id }}</span>
+        <a href="/" class="nav-pill">Create New Comic</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="creator-container">
+    <div class="success-card">
+      <div class="success-badge-icon">🎉</div>
+      <div class="hero-sound-badge" style="background: var(--comic-yellow); color: #000; margin-bottom: 0.8rem;">
+        SUCCESSFULLY COMPILED!
+      </div>
+      <h1 class="success-title">Your Comic Book is Ready!</h1>
+      <p class="success-desc">
+        <strong>"{{ comic_title }}"</strong> has been converted into a multi-page, print-ready comic book PDF formatted with high-res panels, story narration captions, and character dialogue bubbles.
+      </p>
+
+      <!-- Embedded PDF Viewer / Preview Container -->
+      <div style="background: #020617; border: 3px solid #000; border-radius: 16px; overflow: hidden; margin-bottom: 2rem; box-shadow: 6px 6px 0 #000; height: 420px;">
+        <iframe 
+          src="{{ pdf_path }}" 
+          width="100%" 
+          height="100%" 
+          style="border: none;"
+          title="Comic PDF Preview">
+        </iframe>
+      </div>
+
+      <div class="success-actions">
+        <a href="{{ pdf_path }}" download class="btn-generate-epic" style="font-size: 1.5rem; padding: 0.9rem 2rem;">
+          <span class="btn-icon">📥</span>
+          <span>DOWNLOAD PDF NOW</span>
+        </a>
+        <a href="javascript:history.back()" class="btn-action new-comic" style="justify-content: center;">
+          <span>← Back to Comic Panels</span>
+        </a>
+        <a href="/" class="btn-action" style="justify-content: center; background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border-color: rgba(255,255,255,0.1);">
+          <span>✨ Create Another Story</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-badge">ComicCraft AI</div>
+      <div>Powered by Gemini Flash & Pro, Stable Diffusion, and FPDF</div>
+      <div>Team ID: <strong>{{ team_id }}</strong></div>
+    </div>
+  </footer>
+
+</body>
+</html>

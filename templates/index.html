@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComicCraft – AI Comic Story Creator | Team 6ab22cb7</title>
+  <meta name="description" content="Create personalized comic stories and illustrations from a story idea using Gemini Flash, Gemini Pro, and Stable Diffusion.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
+</head>
+<body>
+
+  <!-- Site Navigation -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="/" class="brand-link" id="navBrandLink">
+        <div class="brand-icon-box">💥</div>
+        <div>
+          <div class="brand-title">Comic<span>Craft</span></div>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <span class="nav-pill team-badge">TEAM ID: {{ team_id }}</span>
+        <button type="button" class="nav-pill" id="testImageBtn" title="Test Stable Diffusion image generator">
+          🧪 Test Image AI
+        </button>
+        <a href="/docs" target="_blank" class="nav-pill" title="FastAPI Swagger Documentation">
+          ⚡ API Docs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Header -->
+  <section class="hero-section">
+    <div class="hero-sound-badge">POW! AI-POWERED COMIC STUDIO</div>
+    <h1 class="hero-title">
+      Turn Your Story Ideas Into <span class="gradient-text">Complete Comics</span>
+    </h1>
+    <p class="hero-subtitle">
+      Harness the power of <strong>Gemini Flash</strong> for structured outlines, <strong>Gemini Pro</strong> for narrative & dialogues, and <strong>Stable Diffusion</strong> for stunning illustrations.
+    </p>
+
+    <!-- AI Architecture Pills -->
+    <div class="hero-model-pills">
+      <span class="model-pill flash">⚡ Gemini 1.5 Flash (5-Panel Outline)</span>
+      <span class="model-pill pro">🧠 Gemini 1.5 Pro (Story & Dialogue)</span>
+      <span class="model-pill sd">🎨 Stable Diffusion v1-5 (Art Generation)</span>
+      <span class="model-pill flash">📄 FPDF (Downloadable Comic Book)</span>
+    </div>
+  </section>
+
+  <!-- Comic Creation Studio Form -->
+  <main class="creator-container">
+    <div class="comic-form-card">
+      <div class="form-header">
+        <div class="form-header-title">
+          <span>🎨 Storyboard Studio</span>
+        </div>
+        <button type="button" class="surprise-btn" id="surpriseBtn" title="Click to fill with a creative prompt!">
+          ✨ Surprise Me! (Random Story)
+        </button>
+      </div>
+
+      <form action="/generate" method="POST" id="comicCreationForm">
+
+        <!-- Story Prompt (Primary Input) -->
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="storyPromptInput">
+            <span>📖 Story Premise / Prompt <span style="color: var(--comic-red);">*</span></span>
+            <span class="label-hint">What is your comic about?</span>
+          </label>
+          <textarea 
+            name="prompt" 
+            id="storyPromptInput" 
+            class="form-textarea" 
+            placeholder="e.g. A brave fox exploring an enchanted forest in search of the ancient glowing crystal..."
+            required>{{ default_prompt }}</textarea>
+        </div>
+
+        <div class="form-grid">
+          <!-- Main Character -->
+          <div class="form-group">
+            <label class="form-label" for="charNameInput">
+              <span>🦸 Main Character Name <span style="color: var(--comic-red);">*</span></span>
+              <span class="label-hint">Protagonist</span>
+            </label>
+            <input 
+              type="text" 
+              name="character_name" 
+              id="charNameInput" 
+              class="form-input" 
+              value="{{ default_character }}" 
+              placeholder="e.g. Finn the Fox, Ren Kurogane"
+              required>
+          </div>
+
+          <!-- Setting -->
+          <div class="form-group">
+            <label class="form-label" for="settingInput">
+              <span>🏰 Story Setting / World <span style="color: var(--comic-red);">*</span></span>
+              <span class="label-hint">Where does it take place?</span>
+            </label>
+            <input 
+              type="text" 
+              name="setting" 
+              id="settingInput" 
+              class="form-input" 
+              value="{{ default_setting }}" 
+              placeholder="e.g. Enchanted Forest, Neo-Tokyo, Mars Colony"
+              required>
+          </div>
+        </div>
+
+        <!-- Story Tone Selection -->
+        <div class="form-group" style="margin-bottom: 1.8rem;">
+          <label class="form-label">
+            <span>🎭 Story Tone</span>
+            <span class="label-hint">Influences narrative pacing & dialogue style</span>
+          </label>
+          <div class="tone-pills-container">
+            {% for tone_name, emoji in [('Adventure', '🗺️'), ('Funny', '😂'), ('Superhero', '🦸'), ('Sci-Fi', '🚀'), ('Mystery', '🕵️'), ('Horror', '👻'), ('Fantasy', '🧙'), ('Action', '⚔️')] %}
+              <input 
+                type="radio" 
+                id="tone_{{ tone_name }}" 
+                name="tone" 
+                value="{{ tone_name }}" 
+                class="tone-radio"
+                {% if tone_name == default_tone %}checked{% endif %}>
+              <label for="tone_{{ tone_name }}" class="tone-pill-label">
+                <span>{{ emoji }}</span>
+                <span>{{ tone_name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Art Style Selection -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label class="form-label">
+            <span>🖌️ Visual Art Style</span>
+            <span class="label-hint">Defines Stable Diffusion illustration rendering</span>
+          </label>
+          <div class="style-options-grid">
+            {% for style_name, emoji, subtitle in [
+                ('Comic Book', '💥', 'Classic Marvel / DC'),
+                ('Manga', '🎌', 'Anime & Shonen'),
+                ('Graphic Novel', '🎨', 'Dark Cinematic Noir'),
+                ('Retro Pop Art', '🍿', 'Vintage 1960s Pop'),
+                ('Watercolor', '🖌️', 'Soft Painterly Brush'),
+                ('Cartoon', '📺', 'Animated Saturday Show')
+              ] %}
+              <input 
+                type="radio" 
+                id="style_{{ loop.index }}" 
+                name="art_style" 
+                value="{{ style_name }}" 
+                class="style-card-radio"
+                {% if style_name == default_art_style %}checked{% endif %}>
+              <label for="style_{{ loop.index }}" class="style-card-label">
+                <span class="style-emoji">{{ emoji }}</span>
+                <span class="style-name">{{ style_name }}</span>
+                <span style="font-size: 0.68rem; color: var(--text-muted);">{{ subtitle }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Panels Count (Hidden / Fixed to 5 as per spec) -->
+        <input type="hidden" name="num_panels" value="5">
+
+        <!-- Optional Gemini API Key Configuration -->
+        <div class="api-key-accordion">
+          <div class="accordion-header" id="apiKeyToggle">
+            <span>🔑 Gemini API Key (Optional / Preconfigured)</span>
+            <span class="accordion-icon">▼</span>
+          </div>
+          <div class="accordion-content" id="apiKeyAccordionContent">
+            <input 
+              type="password" 
+              name="api_key" 
+              id="apiKeyInput" 
+              class="form-input" 
+              placeholder="AIzaSy... (Leave blank to use server environment key)">
+            <div class="api-hint-box">
+              Get a free Google Gemini key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Google AI Studio</a>. Saved securely in your browser's localStorage.
+            </div>
+          </div>
+        </div>
+
+        <!-- Epic Submit Button -->
+        <div class="submit-action-wrapper">
+          <button type="submit" class="btn-generate-epic" id="generateComicBtn">
+            <span class="btn-icon">⚡</span>
+            <span>CREATE COMIC CRAFT!</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </main>
+
+  <!-- Animated Comic Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content-box">
+      <div class="loading-comic-badge" id="loadingSoundBadge">POW!</div>
+      <h2 class="loading-step-title" id="loadingStepTitle">Activating Comic AI...</h2>
+      <p class="loading-step-desc" id="loadingStepDesc">Contacting Gemini Flash to plot scenes and camera angles...</p>
+
+      <div class="loading-progress-bar-track">
+        <div class="loading-progress-bar-fill" id="loadingProgressBar"></div>
+      </div>
+
+      <div class="loading-steps-pills">
+        <span class="step-item active" id="step1">1. Outline</span>
+        <span class="step-item" id="step2">2. Dialogues</span>
+        <span class="step-item" id="step3">3. Illustrations</span>
+        <span class="step-item" id="step4">4. PDF Export</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-badge">ComicCraft AI</div>
+      <div>Developed with FastAPI, Gemini Flash, Gemini Pro, Stable Diffusion & FPDF</div>
+      <div>Team ID: <strong>{{ team_id }}</strong></div>
+    </div>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

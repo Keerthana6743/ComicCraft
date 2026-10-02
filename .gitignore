@@ -1,0 +1,26 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+comiccraft-env/
+venv/
+env/
+ENV/
+
+# Environment Variables
+.env
+
+# Generated Output
+static/panels/*.png
+static/exports/*.pdf
+!static/panels/.gitkeep
+!static/exports/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
