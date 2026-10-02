@@ -60,7 +60,7 @@ def get_pipeline():
     _pipeline_init_attempted = True
 
     # Check if forced fallback
-    if os.getenv("ENABLE_FALLBACK_IMAGE_GEN", "false").lower() == "true":
+    if os.getenv("ENABLE_FALLBACK_IMAGE_GEN", "true").lower() == "true":
         logger.info("Fallback image generator explicitly enabled via ENABLE_FALLBACK_IMAGE_GEN.")
         _pipeline_available = False
         return None
