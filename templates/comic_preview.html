@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ prompt }} – ComicCraft Preview | Team 6ab22cb7</title>
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
 </head>
+
 <body>
 
   <!-- Navigation -->
@@ -55,7 +58,8 @@
         <a href="{{ pdf_path }}" download class="btn-action download-pdf" id="mainDownloadBtn">
           📥 Download PDF
         </a>
-        <a href="/export-success?pdf_path={{ pdf_path }}&title={{ prompt }}" class="btn-action" style="background: rgba(255,255,255,0.08); color: #fff;">
+        <a href="/export-success?pdf_path={{ pdf_path }}&title={{ prompt }}" class="btn-action"
+          style="background: rgba(255,255,255,0.08); color: #fff;">
           👁️ Export Card
         </a>
         <a href="/" class="btn-action new-comic">
@@ -65,8 +69,10 @@
     </div>
 
     <!-- Comic Dynamic Re-generation Bar -->
-    <div class="comic-form-card" style="padding: 1.25rem 2rem; margin-bottom: 2.5rem; background: rgba(17, 24, 39, 0.75);">
-      <form action="/generate" method="POST" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div class="comic-form-card"
+      style="padding: 1.25rem 2rem; margin-bottom: 2.5rem; background: rgba(17, 24, 39, 0.75);">
+      <form action="/generate" method="POST"
+        style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
         <input type="hidden" name="prompt" value="{{ prompt }}">
         <input type="hidden" name="character_name" value="{{ character }}">
         <input type="hidden" name="setting" value="{{ setting }}">
@@ -80,21 +86,23 @@
             <label style="font-size: 0.82rem; color: var(--text-muted);">Change Tone:</label>
             <select name="tone" class="form-select" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;">
               {% for t in ['Adventure', 'Funny', 'Superhero', 'Sci-Fi', 'Mystery', 'Horror', 'Fantasy', 'Action'] %}
-                <option value="{{ t }}" {% if t == tone %}selected{% endif %}>{{ t }}</option>
+              <option value="{{ t }}" {% if t==tone %}selected{% endif %}>{{ t }}</option>
               {% endfor %}
             </select>
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <label style="font-size: 0.82rem; color: var(--text-muted);">Change Art Style:</label>
-            <select name="art_style" class="form-select" style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+            <select name="art_style" class="form-select"
+              style="width: auto; padding: 0.4rem 0.8rem; font-size: 0.85rem;">
               {% for s in ['Comic Book', 'Manga', 'Graphic Novel', 'Retro Pop Art', 'Watercolor', 'Cartoon'] %}
-                <option value="{{ s }}" {% if s == art_style %}selected{% endif %}>{{ s }}</option>
+              <option value="{{ s }}" {% if s==art_style %}selected{% endif %}>{{ s }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
 
-        <button type="submit" class="btn-action" style="background: var(--comic-red); color: #fff; padding: 0.5rem 1.2rem;">
+        <button type="submit" class="btn-action"
+          style="background: var(--comic-red); color: #fff; padding: 0.5rem 1.2rem;">
           🔄 Re-generate Storyline
         </button>
       </form>
@@ -103,73 +111,70 @@
     <!-- Comic Panels Grid -->
     <div class="comic-panels-grid">
       {% for panel in panels %}
-        <article class="comic-panel-card" id="panel-card-{{ panel.panel_number }}">
-          <!-- Header Banner -->
-          <div class="panel-header-banner">
-            <span class="panel-num-tag">PANEL {{ panel.panel_number }}</span>
-            <h2 class="panel-title-text">{{ panel.title }}</h2>
+      <article class="comic-panel-card" id="panel-card-{{ panel.panel_number }}">
+        <!-- Header Banner -->
+        <div class="panel-header-banner">
+          <span class="panel-num-tag">PANEL {{ panel.panel_number }}</span>
+          <h2 class="panel-title-text">{{ panel.title }}</h2>
+        </div>
+
+        <!-- Comic Illustration Frame -->
+        <div class="panel-image-container">
+          <img src="{{ panel.image_path }}" alt="Panel {{ panel.panel_number }}: {{ panel.title }}"
+            class="panel-image-img" loading="lazy">
+        </div>
+
+        <!-- Story Text & Dialogue Content -->
+        <div class="panel-content-body">
+          <!-- Comic Narration Caption Box -->
+          {% if panel.narration %}
+          <div class="narration-caption-box">
+            <div class="caption-label">NARRATION CAPTION</div>
+            <p class="caption-text">{{ panel.narration }}</p>
+          </div>
+          {% endif %}
+
+          <!-- Speech Balloon -->
+          {% if panel.dialogue %}
+          <div class="speech-bubble">
+            <div class="bubble-speaker">💬 CHARACTER DIALOGUE</div>
+            <p class="bubble-dialogue-text">{{ panel.dialogue }}</p>
+          </div>
+          {% endif %}
+
+          <!-- Panel Tools -->
+          <div class="panel-footer-tools">
+            <button type="button" class="prompt-details-toggle">
+              🔍 Inspect Prompt & Details
+            </button>
+            <button type="button" class="btn-reroll-panel" data-panel-number="{{ panel.panel_number }}"
+              data-scene-desc="{{ panel.scene_description }}">
+              🎲 Re-roll Panel
+            </button>
           </div>
 
-          <!-- Comic Illustration Frame -->
-          <div class="panel-image-container">
-            <img 
-              src="{{ panel.image_path }}" 
-              alt="Panel {{ panel.panel_number }}: {{ panel.title }}" 
-              class="panel-image-img"
-              loading="lazy">
-          </div>
-
-          <!-- Story Text & Dialogue Content -->
-          <div class="panel-content-body">
-            <!-- Comic Narration Caption Box -->
-            {% if panel.narration %}
-              <div class="narration-caption-box">
-                <div class="caption-label">NARRATION CAPTION</div>
-                <p class="caption-text">{{ panel.narration }}</p>
-              </div>
-            {% endif %}
-
-            <!-- Speech Balloon -->
-            {% if panel.dialogue %}
-              <div class="speech-bubble">
-                <div class="bubble-speaker">💬 CHARACTER DIALOGUE</div>
-                <p class="bubble-dialogue-text">{{ panel.dialogue }}</p>
-              </div>
-            {% endif %}
-
-            <!-- Panel Tools -->
-            <div class="panel-footer-tools">
-              <button type="button" class="prompt-details-toggle">
-                🔍 Inspect Prompt & Details
-              </button>
-              <button 
-                type="button" 
-                class="btn-reroll-panel" 
-                data-panel-number="{{ panel.panel_number }}"
-                data-scene-desc="{{ panel.scene_description }}">
-                🎲 Re-roll Panel
-              </button>
+          <!-- Expandable Prompt Details Inspector -->
+          <div class="panel-prompt-inspector">
+            <div style="color: var(--comic-yellow); font-weight: 700; margin-bottom: 0.2rem;">SCENE DESCRIPTION:</div>
+            <div style="margin-bottom: 0.5rem;">{{ panel.scene_description }}</div>
+            <div style="color: var(--comic-cyan); font-weight: 700; margin-bottom: 0.2rem;">STABLE DIFFUSION PROMPT:
             </div>
-
-            <!-- Expandable Prompt Details Inspector -->
-            <div class="panel-prompt-inspector">
-              <div style="color: var(--comic-yellow); font-weight: 700; margin-bottom: 0.2rem;">SCENE DESCRIPTION:</div>
-              <div style="margin-bottom: 0.5rem;">{{ panel.scene_description }}</div>
-              <div style="color: var(--comic-cyan); font-weight: 700; margin-bottom: 0.2rem;">STABLE DIFFUSION PROMPT:</div>
-              <div>{{ panel.image_prompt }}</div>
-            </div>
+            <div>{{ panel.image_prompt }}</div>
           </div>
-        </article>
+        </div>
+      </article>
       {% endfor %}
     </div>
 
     <!-- Bottom Actions Banner -->
-    <div style="margin-top: 4rem; text-align: center; background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem;">
+    <div
+      style="margin-top: 4rem; text-align: center; background: rgba(17, 24, 39, 0.8); border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2.5rem;">
       <h3 style="font-family: var(--font-comic); font-size: 2.2rem; color: var(--comic-yellow); margin-bottom: 0.5rem;">
         READY TO PRINT OR SHARE?
       </h3>
       <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 1.5rem;">
-        Your complete 5-panel comic has been formatted into a high-resolution, multi-page comic book PDF complete with title covers, borders, and speech bubbles.
+        Your complete 5-panel comic has been formatted into a high-resolution, multi-page comic book PDF complete with
+        title covers, borders, and speech bubbles.
       </p>
       <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
         <a href="{{ pdf_path }}" download class="btn-generate-epic" style="font-size: 1.5rem; padding: 0.9rem 2rem;">
@@ -188,7 +193,44 @@
       <div>Team ID: <strong>{{ team_id }}</strong></div>
     </div>
   </footer>
+  <script>
+    async function generateRealAIImages() {
+      const panels = document.querySelectorAll(".comic-panel-card");
 
+      for (const panel of panels) {
+        const image = panel.querySelector(".panel-image-img");
+        const promptBox = panel.querySelector(".panel-prompt-inspector");
+
+        if (!image || !promptBox) continue;
+
+        const prompt = promptBox.innerText
+          .replace("SCENE DESCRIPTION:", "")
+          .replace("STABLE DIFFUSION PROMPT:", "")
+          .trim();
+
+        try {
+          image.style.opacity = "0.5";
+
+          const aiImage = await puter.ai.txt2img(
+            prompt + ", comic book illustration, detailed characters, cinematic lighting, high quality",
+            { model: "gemini-3.1-flash-image", quality: "1K" }
+          );
+
+          image.src = aiImage.src;
+          image.style.opacity = "1";
+
+        } catch (error) {
+          console.error("Puter image generation failed:", error);
+          image.style.opacity = "1";
+        }
+      }
+    }
+
+    window.addEventListener("load", () => {
+      generateRealAIImages();
+    });
+  </script>
   <script src="/static/script.js"></script>
 </body>
+
 </html>
