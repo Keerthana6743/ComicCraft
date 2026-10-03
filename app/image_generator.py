@@ -21,6 +21,7 @@ import requests
 from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
+_last_call =0.0
 
 # Primary Stable Diffusion Model
 SD_MODEL_ID = "runwayml/stable-diffusion-v1-5"
