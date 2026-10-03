@@ -71,3 +71,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+@app.get("/test-image")
+def test_image():
+    from app.image_generator import test_generation
+    return test_generation()

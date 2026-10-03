@@ -17,6 +17,8 @@ import logging
 from pathlib import Path
 from typing import Optional, Tuple, Any, Dict
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import requests
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ SD_MODEL_ID = "runwayml/stable-diffusion-v1-5"
 # Cached pipeline instance
 _pipeline = None
 _pipeline_init_attempted = False
-_pipeline_available = False
+_pipeline_available = True
 
 
 def _get_device() -> Tuple[str, Any]:
@@ -286,76 +288,29 @@ def generate_image(
     height: int = 512,
     num_inference_steps: int = 25
 ) -> str:
-    """
-    Generate a comic panel illustration from prompt using Stable Diffusion.
-    Saves image into `output_dir` and returns web relative path e.g. `/static/panels/...`.
-
-    Args:
-        prompt: Image generation prompt (derived from Gemini Flash outline).
-        panel_number: Index of the comic panel (1..N).
-        art_style: Visual art style (Comic Book, Manga, Retro Pop, etc.).
-        output_dir: Destination folder (default: 'static/panels').
-        width: Image width in pixels (512 default).
-        height: Image height in pixels (512 default).
-        num_inference_steps: Diffusion steps (20-30 recommended).
-
-    Returns:
-        Web-accessible URL path string, e.g. '/static/panels/panel_1711929381_1.png'
-    """
-    # Ensure destination directory exists
     os.makedirs(output_dir, exist_ok=True)
-
-    timestamp = int(time.time())
-    filename = f"panel_{timestamp}_{panel_number}.png"
+    filename = f"panel_{int(time.time())}_{panel_number}.png"
     filepath = os.path.join(output_dir, filename)
 
-    # Enhance prompt with style tokens
-    enhanced_prompt = (
-        f"{prompt}, {art_style} comic style, bold ink lines, dynamic perspective, "
-        "vibrant comic book color palette, crisp illustration, sharp focus, masterpiece"
-    )
-    negative_prompt = (
-        "blurry, ugly, distorted, low quality, bad anatomy, deformed limbs, watermark, text banner"
+    full_prompt = f"{prompt}, {art_style} style, comic book panel, vibrant colors, no text"
+    url = (
+        "https://image.pollinations.ai/prompt/" + quote(full_prompt)
+        + f"?width={width}&height={height}&nologo=true&seed={random.randint(1, 999999)}"
     )
 
-    pipe = get_pipeline()
+    try:
+        resp = requests.get(url, timeout=90)
+        resp.raise_for_status()
+        if not resp.headers.get("content-type", "").startswith("image"):
+            raise ValueError("Pollinations did not return an image")
+        with open(filepath, "wb") as f:
+            f.write(resp.content)
+    except Exception as err:
+        logger.warning(f"Pollinations failed ({err}), using fallback canvas")
+        image = _create_stylized_comic_canvas(prompt, panel_number, art_style, width, height)
+        image.save(filepath, format="PNG")
 
-    if pipe is not None:
-        try:
-            device, _ = _get_device()
-            # If running on CPU, reduce inference steps for responsiveness
-            steps = num_inference_steps if device == "cuda" else min(15, num_inference_steps)
-
-            logger.info(f"Generating panel {panel_number} with Stable Diffusion ({steps} steps)...")
-            result = pipe(
-                prompt=enhanced_prompt,
-                negative_prompt=negative_prompt,
-                width=width,
-                height=height,
-                num_inference_steps=steps,
-                guidance_scale=7.5
-            )
-            image = result.images[0]
-            image.save(filepath, format="PNG")
-            logger.info(f"Panel {panel_number} saved to {filepath}")
-            return f"/{output_dir.replace(os.sep, '/')}/{filename}"
-
-        except Exception as err:
-            logger.error(f"Stable Diffusion generation failed for panel {panel_number}: {err}. Falling back to Comic Canvas generator.")
-
-    # High quality comic canvas fallback
-    fallback_img = _create_stylized_comic_canvas(
-        prompt=prompt,
-        panel_number=panel_number,
-        art_style=art_style,
-        width=width,
-        height=height
-    )
-    fallback_img.save(filepath, format="PNG")
-    logger.info(f"Fallback comic panel {panel_number} created and saved to {filepath}")
     return f"/{output_dir.replace(os.sep, '/')}/{filename}"
-
-
 def test_generation(prompt: str = "Finn the Fox in an enchanted forest", art_style: str = "Comic Book") -> dict:
     """Helper function to test image generation on demand (e.g. for /test-image route)."""
     start_time = time.time()

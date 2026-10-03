@@ -213,16 +213,17 @@
         try {
           image.style.opacity = "0.5";
 
-          const aiImage = await puter.ai.txt2img(
-            prompt + ", comic book illustration, detailed characters, cinematic lighting, high quality",
-            { model: "gemini-3.1-flash-image", quality: "1K" }
-          );
+          const response = await fetch("/test-image");
+          const data = await response.json();
 
-          image.src = aiImage.src;
+          if (data.image_path) {
+            image.src = data.image_path;
+          }
+
           image.style.opacity = "1";
 
         } catch (error) {
-          console.error("Puter image generation failed:", error);
+          console.error("Local image generation failed:", error);
           image.style.opacity = "1";
         }
       }
