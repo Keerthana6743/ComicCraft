@@ -288,6 +288,7 @@ def generate_image(
     height: int = 512,
     num_inference_steps: int = 25
 ) -> str:
+    global _last_call
     os.makedirs(output_dir, exist_ok=True)
     filename = f"panel_{int(time.time())}_{panel_number}.png"
     filepath = os.path.join(output_dir, filename)
@@ -298,19 +299,23 @@ def generate_image(
         + f"?width={width}&height={height}&nologo=true&seed={random.randint(1, 999999)}"
     )
 
-    try:
-        resp = requests.get(url, timeout=90)
-        resp.raise_for_status()
-        if not resp.headers.get("content-type", "").startswith("image"):
-            raise ValueError("Pollinations did not return an image")
-        with open(filepath, "wb") as f:
-            f.write(resp.content)
-    except Exception as err:
-        logger.warning(f"Pollinations failed ({err}), using fallback canvas")
-        image = _create_stylized_comic_canvas(prompt, panel_number, art_style, width, height)
-        image.save(filepath, format="PNG")
+    for attempt in range(6):
+        wait = 17 - (time.time() - _last_call)
+        if wait > 0:
+            time.sleep(wait)
+        _last_call = time.time()
+        try:
+            resp = requests.get(url, timeout=120)
+            resp.raise_for_status()
+            if not resp.headers.get("content-type", "").startswith("image"):
+                raise ValueError("Pollinations did not return an image")
+            with open(filepath, "wb") as f:
+                f.write(resp.content)
+            return f"/{output_dir.replace(os.sep, '/')}/{filename}"
+        except Exception as err:
+            logger.warning(f"Pollinations attempt {attempt + 1} failed ({err})")
 
-    return f"/{output_dir.replace(os.sep, '/')}/{filename}"
+    raise RuntimeError("Image service is busy. Please try again in a minute.")
 def test_generation(prompt: str = "Finn the Fox in an enchanted forest", art_style: str = "Comic Book") -> dict:
     """Helper function to test image generation on demand (e.g. for /test-image route)."""
     start_time = time.time()
